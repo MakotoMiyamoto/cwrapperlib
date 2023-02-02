@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 #ifdef _WIN32
     #define scanf(...) scanf_s(__VA_ARGS__)
@@ -35,7 +33,7 @@ void _raise(const char *filename, const char *function, int line, const char *re
 #define __READ_DOUBLE_READLEN 1
 #define __READ_CHAR_READLEN 1
 
-int _read_int(FILE *p, int _line, const char *_filename) {
+inline int _read_int(FILE *p, int _line, const char *_filename) {
     int d;
     int res = fscanf(p, "%d", &d);
     if (res != __READ_INT_READLEN) {
@@ -44,7 +42,7 @@ int _read_int(FILE *p, int _line, const char *_filename) {
     return d;
 }
 
-double _read_double(FILE *p, int _line, const char *_filename) {
+inline double _read_double(FILE *p, int _line, const char *_filename) {
     double lf;
     int res = fscanf(p, "%lf", &lf);
     if (res != __READ_DOUBLE_READLEN) {
@@ -53,7 +51,7 @@ double _read_double(FILE *p, int _line, const char *_filename) {
     return lf;
 }
 
-char _read_char(FILE *p, int _line, const char *_filename) {
+inline char _read_char(FILE *p, int _line, const char *_filename) {
     char c;
     int res = fscanf(p, "%c", &c);
     if (res != __READ_CHAR_READLEN) {
@@ -95,7 +93,6 @@ char _read_char(FILE *p, int _line, const char *_filename) {
 /// Function will raise an error if a double cannot be read 
 /// from stdin.
 #define read_double() read_double_f(stdin)
-
 /// Attempts to read a char from a stdin.
 ///
 /// Raises:
