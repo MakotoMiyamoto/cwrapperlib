@@ -127,7 +127,7 @@ Result(TYPE) Result_##TYPE##__Err(const char *err_msg) { \
     strcpy(res._data.err, sizeof res._data.err, err_msg); \
     return res; \
 } \
-TYPE Result_##TYPE##_unwrap(Result(TYPE) *res, const char *filename, int line) { \
+inline TYPE Result_##TYPE##_unwrap(Result(TYPE) *res, const char *filename, int line) { \
     if (res->_err) { _raise(filename, "unwrap(?)", line, "Result not Ok."); } \
     return res->_data.ok; \
 } \
