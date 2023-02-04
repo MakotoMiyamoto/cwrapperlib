@@ -12,17 +12,18 @@
     #define strncpy(...) strncpy_s(__VA_ARGS__)
 #endif
 
-#define nameof(FUNC) #FUNC
+#define _str(expr) #expr
+#define str(expr) _str(expr)
 
 void _exit_from_raise() {
     printf("Exiting with errno %d", errno);
     exit(errno);
 }
 
-void _raise(const char *filename, const char *function, int line, const char *reason) {
+void _raise(const char *filename, const char *trace, int line, const char *reason) {
     fprintf(stderr, "Error raised in %s:%s at line %d: %s\n\terrno = %d\n", 
     filename, 
-    function, 
+    trace, 
     line, 
     reason,
     errno);
@@ -102,60 +103,7 @@ inline char _read_char(FILE *p, int _line, const char *_filename) {
 /// Note: This is not to be confused with a byte.
 #define read_char() read_char_f(stdin)
 
-#define Generic__ResultUnion(TYPE)  \
-typedef union ResultUnion__##TYPE { \
-    TYPE ok;                        \
-    char err[256];                  \
-} ResultUnion__##TYPE;
-
-#define ResultUnion(TYPE) ResultUnion__##TYPE
-
-#define Generic__Result(TYPE)   \
-Generic__ResultUnion(TYPE)      \
-                                \
-typedef struct Result_##TYPE {  \
-    bool _err;                  \
-    ResultUnion(TYPE) _data;    \
-} Result_##TYPE;                \
-                                \
-Result(TYPE) Result_##TYPE##__Ok(TYPE t) { \
-    Result(TYPE) res = { ._err = false, ._data.ok = t }; \
-    return res; \
-} \
-Result(TYPE) Result_##TYPE##__Err(const char *err_msg) { \
-    Result(TYPE) res = { ._err = true }; \
-    strcpy(res._data.err, sizeof res._data.err, err_msg); \
-    return res; \
-} \
-inline TYPE Result_##TYPE##_unwrap(Result(TYPE) *res, const char *filename, int line) { \
-    if (res->_err) { _raise(filename, "unwrap(?)", line, "Result not Ok."); } \
-    return res->_data.ok; \
-} \
-
-#define Result(TYPE) Result_##TYPE
-
-#define Ok(TYPE, t) Result_##TYPE##__Ok(t)
-#define Err(TYPE, msg) Result_##TYPE##__Err(msg)
-
-#define unwrap(TYPE, p_res) Result_##TYPE##_unwrap(p_res, __FILE__, __LINE__)
-#define is_err(res) res._err == true
-
-Generic__Result(int)
-
-Result(int) read_int_range(int lower, int upper) {
-    int t;
-    scanf("%d", &t);
-    if (t < lower || t > upper) {
-        return Err(int, "Input value out of bounds.");
-    }
-    return Ok(int, t);
-}
-
 int main(void) {
-    Result(int) month = read_int_range(1, 12);
-    while (is_err(month)) {
-        printf("Keep range between 1-12. ");
-        month = read_int_range(1, 12);
-    }
-    printf("%d\n", unwrap(int, &month));
+    errno = 5;
+    _raise(__FILE__, "main(void)", __LINE__, "Arbitrary error call.");
 }
